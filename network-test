@@ -70,7 +70,7 @@ fi
 echo-table
 
 # CURL_DNS_V6
-if EXTERNAL_V6=$(curl ipinfo.io/ip -6 --connect-timeout 1 --silent --fail)
+if EXTERNAL_V6=$(curl v6.ipinfo.io/ip -6 --connect-timeout 1 --silent --fail)
 then
   CURL_DNS_V6="${Y}"
 else
