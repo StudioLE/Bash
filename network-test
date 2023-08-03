@@ -1,98 +1,63 @@
 #!/bin/bash
 set -uo pipefail
+GREEN="\e[32m"
+RED="\e[31m"
+GREY="\e[37m"
+RESET="\e[0m"
+Y="${GREEN} ✔ ${GREY}"
+N="${RED} ✘ ${GREY}"
+P="${GREY} ⏲ ${GREY}"
 
-SUCCESS="TRUE"
-
-echo-success () {
-  echo -ne "\e[32m ✔  $1\e[0m"
+function move-cursor-up {
+  declare -i N
+  [[ -v "1" ]] && N="$1" || N="1"
+  echo -ne '\e['"${N}"'A'
 }
 
-echo-information () {
-  echo -ne "\e[34m ⓘ  $1\e[0m"
+echo-table () {
+  move-cursor-up 4
+  HEADER1=", Ping, Ping, Curl, Curl,,"
+  HEADER2=", IP, DNS, IP, DNS, Interface, External IP"
+  ROW1="IPv4, ${PING_IP_V4:-${P}}, ${PING_DNS_V4:-${P}}, ${CURL_IP_V4:-${P}}, ${CURL_DNS_V4:-${P}}, ${INTERFACE_V4:-${P}}, ${IP_V4:-${P}}"
+  ROW2="IPv6, ${PING_IP_V6:-${P}}, ${PING_DNS_V6:-${P}}, ${CURL_IP_V6:-${P}}, ${CURL_DNS_V6:-${P}}, ${INTERFACE_V6:-${P}}, ${IP_V6:-${P}}"
+  ROWS="${HEADER1}\n${HEADER2}\n${ROW1}\n${ROW2}"
+  echo -e "${ROWS}" | column --table --separator , --output-separator ' '
 }
 
-echo-error () {
-  echo -ne "\e[31m !  $1\e[0m"
-}
+echo -ne "${GREY}"
+echo -e "\n\n\n\n"
+echo-table
 
-echo-warning () {
-  echo -ne "\e[33m ⚠  $1\e[0m"
-}
+# PING_IP_V4
+ping 1.1.1.1 -4 -c 1 -q -w 1 > /dev/null && PING_IP_V4="${Y}" || PING_IP_V4="${N}"
+echo-table
 
-echo-subsidiary () {
-  echo -ne "\e[37m    $1\e[0m"
-}
+# PING_IP_V6
+ping 2606:4700:4700::1111 -6 -c 1 -q -w 1 > /dev/null && PING_IP_V6="${Y}" || PING_IP_V6="${N}"
+echo-table
 
-echo-step () {
-  echo-break
-  echo -ne "\e[37m$1\e[0m"
-}
+# PING_DNS_V4
+ping one.one.one.one -4 -c 1 -q -w 1 > /dev/null && PING_DNS_V4="${Y}" || PING_DNS_V4="${N}"
+echo-table
 
-echo-break () {
-  echo ""
-}
+# PING_DNS_V6
+ping one.one.one.one -6 -c 1 -q -w 1 > /dev/null && PING_DNS_V6="${Y}" || PING_DNS_V6="${N}"
+echo-table
 
-echo-step "IPv4 Ping     "
-if ping 1.1.1.1 -4 -c 1 -q -w 1 > /dev/null
-then
-  echo-success "Succeeded"
-else
-  echo-error "Failed   "
-  SUCCESS=""
-fi
+# CURL_IP_V4
+curl 1.1.1.1 -4 --connect-timeout 1 --silent > /dev/null && CURL_IP_V4="${Y}" || CURL_IP_V4="${N}"
+echo-table
 
-echo-step "IPv6 Ping     "
-if ping 2606:4700:4700::1111 -6 -c 1 -q -w 1 > /dev/null
-then
-  echo-success "Succeeded"
-else
-  echo-error "Failed   "
-  SUCCESS=""
-fi
+# CURL_IP_V6
+curl 2606:4700:4700::1111 -6 --connect-timeout 1 --silent && CURL_IP_V6="${Y}" || CURL_IP_V6="${N}"
+echo-table
 
-echo-step "IPv4 DNS      "
-if ping one.one.one.one -4 -c 1 -q -w 1 > /dev/null
-then
-  echo-success "Succeeded"
-else
-  echo-error "Failed   "
-  SUCCESS=""
-fi
+# CURL_DNS_V4
+IP_V4=$(curl ipinfo.io/ip -4 --connect-timeout 1 --silent --fail || echo "${N}") && CURL_DNS_V4="${Y}" || CURL_DNS_V4="${N}"
+echo-table
 
-echo-step "IPv6 DNS      "
-if ping one.one.one.one -6 -c 1 -q -w 1 > /dev/null
-then
-  echo-success "Succeeded"
-else
-  echo-error "Failed   "
-  SUCCESS=""
-fi
+# CURL_DNS_V6
+IP_V6=$(curl ipinfo.io/ip -6 --connect-timeout 1 --silent --fail || echo "${N}") && CURL_DNS_V6="${Y}" || CURL_DNS_V6="${N}"
+echo-table
 
-echo-step "IPv4 Address  "
-IPv4=$(curl ipinfo.io/ip -4 --connect-timeout 1 --silent)
-if [[ $? == 0 ]]
-then
-  echo-success "Succeeded"
-  echo-subsidiary "${IPv4}"
-else
-  echo-error "Failed   "
-  SUCCESS=""
-fi
-
-echo-step "IPv6 Address  "
-IPv6=$(curl v6.ipinfo.io/ip -6 --connect-timeout 1 --silent)
-if [[ $? == 0 ]]
-then
-  echo-success "Succeeded"
-  echo-subsidiary "${IPv6}"
-else
-  echo-error "Failed   "
-  SUCCESS=""
-fi
-
-echo-break
-
-if [[ "${SUCCESS}" == "" ]]
-then
-  exit 1
-fi
+echo -ne "${RESET}"
