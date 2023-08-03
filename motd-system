@@ -1,14 +1,14 @@
 #!/bin/bash
 
-COLOR=${1:-"37"}
-LAYOUT=${2:-"horizontal"}
+LAYOUT=${1:-"horizontal"}
+COLOR=${2:-"37"}
 
 CPUS=$(nproc --all)
 LOAD_ALL=$(cat /proc/loadavg)
-LOAD_1M_PERCENT=$(echo "${LOAD_ALL}" | awk "{print (\$1/${CPUS})*100}" | awk '{printf "%5.1f",$i}')
-LOAD_5M_PERCENT=$(echo "${LOAD_ALL}" | awk "{print (\$2/${CPUS})*100}" | awk '{printf "%5.1f",$i}')
-LOAD_15M_PERCENT=$(echo "${LOAD_ALL}" | awk "{print (\$3/${CPUS})*100}" | awk '{printf "%5.1f",$i}')
-LOAD_SUMMARY="${LOAD_1M_PERCENT}%${LOAD_5M_PERCENT}%${LOAD_15M_PERCENT}% of ${CPUS} cpus"
+LOAD_1M_PERCENT=$(echo "${LOAD_ALL}" | awk "{print (\$1/${CPUS})*100}" | awk '{printf "%0.1f",$i}')
+LOAD_5M_PERCENT=$(echo "${LOAD_ALL}" | awk "{print (\$2/${CPUS})*100}" | awk '{printf "%0.1f",$i}')
+LOAD_15M_PERCENT=$(echo "${LOAD_ALL}" | awk "{print (\$3/${CPUS})*100}" | awk '{printf "%0.1f",$i}')
+LOAD_SUMMARY="${LOAD_1M_PERCENT}% ${LOAD_5M_PERCENT}% ${LOAD_15M_PERCENT}% of ${CPUS} CPUs"
 
 MEMORY_PERCENT=$(free | grep Mem | awk '{print ($3/$2)*100}' | awk '{printf "%0.1f",$i}')
 MEMORY_TOTAL=$(free -h --si | grep Mem | awk '{print $2}')
@@ -18,10 +18,11 @@ SWAP_TOTAL=$(free -h --si | grep Swap | awk '{print $2}')
 if [[ "${SWAP_TOTAL}" == "0B" ]]
 then
   SWAP_PERCENT="0"
+  SWAP_SUMMARY="-"
 else
   SWAP_PERCENT=$(free | grep Swap | awk '{print ($3/$2)*100}' | awk '{printf "%0.1f",$i}')
+  SWAP_SUMMARY="${SWAP_PERCENT}% of ${SWAP_TOTAL}"
 fi
-SWAP_SUMMARY="${SWAP_PERCENT}% of ${SWAP_TOTAL}"
 
 DISK_PERCENT=$( df -H | grep '/$' | awk '{print $5}')
 DISK_TOTAL=$( df -H | grep '/$' | awk '{print $2}')
@@ -30,30 +31,17 @@ DISK_SUMMARY="${DISK_PERCENT} of ${DISK_TOTAL}"
 echo -en "\e[${COLOR}m"
 
 if [[ "${LAYOUT}" == "vertical" ]]
-then  
-  echo "Root disk   ${DISK_SUMMARY}"
-  echo "Memory      ${MEMORY_SUMMARY}"
-  if [[ "${SWAP_TOTAL}" != "0B" ]]
-  then
-    echo "Swap        ${SWAP_SUMMARY}"
-  fi
-  echo "Load        ${LOAD_SUMMARY}"
+then
+  TABLE=""
+  TABLE+="Root disk, ${DISK_SUMMARY}\n"
+  TABLE+="Memory, ${MEMORY_SUMMARY}\n"
+  TABLE+="Swap, ${SWAP_SUMMARY}\n"
+  TABLE+="Load, ${LOAD_SUMMARY}\n"
 else
-  echo -ne "Root disk \t"
-  echo -ne "Memory \t\t"
-  if [[ "${SWAP_TOTAL}" != "0B" ]]
-  then
-    echo -ne "Swap \t\t"
-  fi
-  echo -ne "    1m    5m   15m      Load"
-  echo ""
-  echo -ne "${DISK_SUMMARY} \t"
-  echo -ne "${MEMORY_SUMMARY} \t"
-  if [[ "${SWAP_TOTAL}" != "0B" ]]
-  then
-    echo -ne "${SWAP_SUMMARY} \t"
-  fi
-  echo -ne "${LOAD_SUMMARY} \t"
-  echo ""
+  HEADER="Root disk, Memory, Swap, 1m,5m,15m,Load"
+  DATA="${DISK_SUMMARY}, ${MEMORY_SUMMARY}, ${SWAP_SUMMARY}, ${LOAD_1M_PERCENT}%,${LOAD_5M_PERCENT}%,${LOAD_15M_PERCENT}%,of ${CPUS} CPUs"
+  TABLE="${HEADER}\n${DATA}"
 fi
+OUTPUT=$(echo -e "${TABLE}" | column --table --separator , --output-separator '  ') || TABLE="${ROWS}"
+echo -e "${OUTPUT}"
 echo -en "\e[0m"
