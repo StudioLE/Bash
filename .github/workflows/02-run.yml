@@ -27,4 +27,4 @@ jobs:
 
       - name: Run
         continue-on-error: true
-        run: sudo bash "src/${{ inputs.file }}"
+        run: sudo bash "${{ inputs.file }}"
