@@ -21,7 +21,8 @@ echo-table () {
   ROW1="IPv4, ${PING_IP_V4:-${P}}, ${PING_DNS_V4:-${P}}, ${CURL_IP_V4:-${P}}, ${CURL_DNS_V4:-${P}}, ${INTERFACE_V4:-${P}}, ${INTERNAL_V4:-${P}}, ${EXTERNAL_V4:-${P}}"
   ROW2="IPv6, ${PING_IP_V6:-${P}}, ${PING_DNS_V6:-${P}}, ${CURL_IP_V6:-${P}}, ${CURL_DNS_V6:-${P}}, ${INTERFACE_V6:-${P}}, ${INTERNAL_V6:-${P}}, ${EXTERNAL_V6:-${P}}"
   ROWS="${HEADER1}\n${HEADER2}\n${ROW1}\n${ROW2}"
-  echo -e "${ROWS}" | column --table --separator , --output-separator ' '
+  TABLE=$(echo -e "${ROWS}" | column --table --separator , --output-separator ' ') || TABLE="${ROWS}"
+  echo -e "${TABLE}"
 }
 
 echo -ne "${GREY}"
