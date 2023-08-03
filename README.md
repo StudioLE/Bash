@@ -1,85 +1,82 @@
 
-### One line installers
+### Bash Scripts
 
-One line installers for [modern alternatives](https://github.com/ibraheemdev/modern-unix) to common software on Ubuntu 22.04. Install the latest version according to the author's recommendations.
+Simple Bash scripts to improve the CLI experience. Primarily developed for Ubuntu 22.04 but likely compatible with other Debian distros.
 
 *You should never trust scripts you aren't familiar with. Piping straight to bash is unsafe.*
 
 *tl;dr: You probably shouldn't use these scripts unless you wrote them yourself.*
 
-### [bat](https://github.com/sharkdp/bat)
+### [disable-motd](https://github.com/StudioLE/Bash/blob/main/disable-motd)
 
-``` bash
-curl -fsS https://install.studiole.uk/bat | sudo bash
+Disable the most verbose parts of Ubuntu's default the Message of the Day (MOTD) displayed on login.
+
+```bash
+# Run
+curl -fsS https://bash.studiole.uk/disable-motd | sudo bash
+
+# Check MOTD
+run-parts /etc/update-motd.d
 ```
 
-### [broot](https://dystroy.org/broot/)
+### [motd-hostname](https://github.com/StudioLE/Bash/blob/main/motd-hostname)
 
-``` bash
-curl -fsS https://install.studiole.uk/broot | sudo bash
-```
+Add a stylised ANSI artwork of the hostname to the Message of the Day (MOTD) displayed on login.
 
-### [Docker](https://www.docker.com/)
-
-``` bash
-curl -fsS https://install.studiole.uk/docker | sudo bash
-```
-
-### [Kubernetes](https://kubernetes.io/)
-
-``` bash
-curl -fsS https://install.studiole.uk/docker | sudo bash
-curl -fsS https://install.studiole.uk/cri-dockerd | sudo bash
-curl -fsS https://install.studiole.uk/kubernetes | sudo bash
-```
-
-### [Hugo](https://gohugo.io/)
-
-``` bash
-curl -fsS https://install.studiole.uk/hugo | sudo bash
-```
-
-### [micro](https://micro-editor.github.io/)
-
-``` bash
-curl -fsS https://install.studiole.uk/micro | sudo bash
-```
-
-### [motd](https://github.com/StudioLE/Install/blob/main/src/)
-
-``` bash
+```bash
+# Install figlet
 curl -fsS https://install.studiole.uk/figlet | sudo bash
-curl -fsS https://install.studiole.uk/src/disable-motd | sudo bash
-curl -fsS https://install.studiole.uk/motd-hostname| sudo bash
+
+# Install motd-hostname
+curl -fsS https://install.studiole.uk/motd-hostname | sudo bash
+
+# Check MOTD
+run-parts /etc/update-motd.d
+```
+
+### [motd-system](https://github.com/StudioLE/Bash/blob/main/motd-system)
+
+Add a simple compact snapshot of system resource use to the Message of the Day (MOTD) displayed on login. Showing CPU, Memory, Disk, Swap
+
+```bash
+# Install
 curl -fsS https://install.studiole.uk/motd-system | sudo bash
+
+# Check MOTD
+run-parts /etc/update-motd.d
 ```
 
-### [network-test](https://github.com/StudioLE/Install/blob/main/src/network-test)
+### [network-test](https://github.com/StudioLE/Bash/blob/main/network-test)
 
-``` bash
+A simple script to test network connectivity. 
+- Attempts to `ping` external servers via IPv4, IPv6 and DNS.
+- Attempts to `curl` to determine the external IPv4 and IPv6 addresses.
+
+```bash
+# Run once
+curl -fsS https://bash.studiole.uk/network-test | sudo bash
+```
+```bash
+# Install
 curl -fsS https://install.studiole.uk/network-test | sudo bash
-```
 
-### [ncdu](https://dev.yorhel.nl/ncdu)
-
-``` bash
-curl -fsS https://install.studiole.uk/ncdu | sudo bash
-```
-
-### [.NET Runtime](https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu)
-
-``` bash
-curl -fsS https://install.studiole.uk/dotnet-runtime | sudo bash
-```
-
-### [.NET SDK](https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu)
-
-``` bash
-curl -fsS https://install.studiole.uk/dotnet-sdk | sudo bash
+# Run
+network-test
 ```
 
 ### [upgrade-packages](https://github.com/StudioLE/Install/blob/main/src/upgrade-packages)
 
+A basic script to quietly and non-interactively update and upgrade packages via `apt`.
+
 ``` bash
+# Run once
+curl -fsS https://bash.studiole.uk/upgrade-packages | sudo bash
+```
+
+``` bash
+# Install
 curl -fsS https://install.studiole.uk/upgrade-packages | sudo bash
+
+# Run
+upgrade-packages
 ```
