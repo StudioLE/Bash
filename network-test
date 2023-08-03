@@ -16,16 +16,22 @@ function move-cursor-up {
 
 echo-table () {
   move-cursor-up 4
-  HEADER1=", Ping, Ping, Curl, Curl,,"
-  HEADER2=", IP, DNS, IP, DNS, Interface, External IP"
-  ROW1="IPv4, ${PING_IP_V4:-${P}}, ${PING_DNS_V4:-${P}}, ${CURL_IP_V4:-${P}}, ${CURL_DNS_V4:-${P}}, ${INTERFACE_V4:-${P}}, ${IP_V4:-${P}}"
-  ROW2="IPv6, ${PING_IP_V6:-${P}}, ${PING_DNS_V6:-${P}}, ${CURL_IP_V6:-${P}}, ${CURL_DNS_V6:-${P}}, ${INTERFACE_V6:-${P}}, ${IP_V6:-${P}}"
+  HEADER1=", Ping, Ping, Curl, Curl, Network, IP, IP"
+  HEADER2=", IP, DNS, IP, DNS, Interface, Internal, External"
+  ROW1="IPv4, ${PING_IP_V4:-${P}}, ${PING_DNS_V4:-${P}}, ${CURL_IP_V4:-${P}}, ${CURL_DNS_V4:-${P}}, ${INTERFACE_V4:-${P}}, ${INTERNAL_V4:-${P}}, ${EXTERNAL_V4:-${P}}"
+  ROW2="IPv6, ${PING_IP_V6:-${P}}, ${PING_DNS_V6:-${P}}, ${CURL_IP_V6:-${P}}, ${CURL_DNS_V6:-${P}}, ${INTERFACE_V6:-${P}}, ${INTERNAL_V6:-${P}}, ${EXTERNAL_V6:-${P}}"
   ROWS="${HEADER1}\n${HEADER2}\n${ROW1}\n${ROW2}"
   echo -e "${ROWS}" | column --table --separator , --output-separator ' '
 }
 
 echo -ne "${GREY}"
 echo -e "\n\n\n\n"
+echo-table
+
+INTERFACE_V4=$(ip route get 1.1.1.1 | awk -F "dev " 'NR==1{split($2,a," ");print a[1]}')
+INTERFACE_V6=$(ip route get 2606:4700:4700::1111 | awk -F "dev " 'NR==1{split($2,a," ");print a[1]}')
+INTERNAL_V4=$(ip route get 1.1.1.1 | awk -F "src " 'NR==1{split($2,a," ");print a[1]}')
+INTERNAL_V6=$(ip route get 2606:4700:4700::1111 | awk -F "src " 'NR==1{split($2,a," ");print a[1]}')
 echo-table
 
 # PING_IP_V4
@@ -53,11 +59,11 @@ curl 2606:4700:4700::1111 -6 --connect-timeout 1 --silent && CURL_IP_V6="${Y}" |
 echo-table
 
 # CURL_DNS_V4
-IP_V4=$(curl ipinfo.io/ip -4 --connect-timeout 1 --silent --fail || echo "${N}") && CURL_DNS_V4="${Y}" || CURL_DNS_V4="${N}"
+EXTERNAL_V4=$(curl ipinfo.io/ip -4 --connect-timeout 1 --silent --fail) && CURL_DNS_V4="${Y}" || CURL_DNS_V4="${N}" && EXTERNAL_V4="${N}"
 echo-table
 
 # CURL_DNS_V6
-IP_V6=$(curl ipinfo.io/ip -6 --connect-timeout 1 --silent --fail || echo "${N}") && CURL_DNS_V6="${Y}" || CURL_DNS_V6="${N}"
+EXTERNAL_V6=$(curl v6.ipinfo.io/ip -6 --connect-timeout 1 --silent --fail) && CURL_DNS_V6="${Y}" || CURL_DNS_V6="${N}" && EXTERNAL_V6="${N}"
 echo-table
 
 echo -ne "${RESET}"
