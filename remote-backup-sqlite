@@ -1,0 +1,122 @@
+#!/bin/bash
+set -uo pipefail
+
+REMOTE_HOST="${1}"
+REMOTE_DIR="${2}"
+BACKUPS_DIR="/backups"
+REMOTE_SOURCE="${REMOTE_HOST}:${REMOTE_DIR}"
+LOCAL_MIRROR_DIR="${BACKUPS_DIR}/mirror/${REMOTE_HOST}${REMOTE_DIR}"
+OUTPUT_LOG_DIR="/var/log/backups"
+OUTPUT_LOG_FILENAME="${REMOTE_HOST}-$(date +%Y-%m-%d_%H-%M-%S).out"
+OUTPUT_LOG_FILE="${OUTPUT_LOG_DIR}/${OUTPUT_LOG_FILENAME}"
+
+echo-success () {
+  echo -e "\e[32m ✔  $1\e[0m" >&2
+}
+
+echo-information () {
+  echo -e "\e[34m ⓘ  $1\e[0m" >&2
+}
+
+echo-error () {
+  echo -e "\e[31m !  $1\e[0m" >&2
+}
+
+echo-warning () {
+  echo -e "\e[33m ⚠  $1\e[0m" >&2
+}
+
+echo-subsidiary () {
+  echo -e "\e[37m    $1\e[0m" >&2
+}
+
+echo-step () {
+  echo -e "\e[0m »  $1\e[0m" >&2
+}
+
+start-timer () {
+  START_TIME=$(date +%s)
+}
+
+stop-timer () {
+  TIMER=$(($(date +%s) - START_TIME))
+  START_TIME=0
+}
+
+setup-output-log () {
+  if [[ ! -d "${OUTPUT_LOG_DIR}" ]]
+  then
+    mkdir -p "${OUTPUT_LOG_DIR}"
+  fi
+  if [[ ! -f "${OUTPUT_LOG_FILE}" ]]
+  then
+    touch "${OUTPUT_LOG_FILE}"
+  fi
+  if [[ ! -w "${OUTPUT_LOG_FILE}" ]]
+  then
+    echo-error "Output log file is not writable"
+    exit 1
+  fi
+}
+
+if [[ ! -v 1 ]] 
+then
+  echo-error "Remote host is required"
+  exit 1
+fi
+
+if [[ ! -v 2 ]] 
+then
+  echo-error "Remote directory is required"
+  exit 1
+fi
+
+if [[ ! -d "${LOCAL_MIRROR_DIR}" ]] 
+then
+  echo-error "Mirror directory does not exist"
+  echo-information "For safety the mirror directory must be manually created before we begin:"
+  echo-subsidiary "mkdir -p \"${LOCAL_MIRROR_DIR}\""
+  exit 1
+fi
+
+setup-output-log
+
+echo-information "Running sqlite backup"
+echo-subsidiary "Logging verbose output to: ${OUTPUT_LOG_FILE}"
+echo-subsidiary "Follow with: tail -n 100 -f ${OUTPUT_LOG_FILE}"
+echo-subsidiary "Source: ${REMOTE_SOURCE}"
+echo-subsidiary "Mirror: ${LOCAL_MIRROR_DIR}"
+
+echo-step "Listing remote sqlite databases"
+start-timer
+if REMOTE_DBS=$(ssh "${REMOTE_HOST}" "find \"${REMOTE_DIR}\" -type f \( -name \"*.db\" -o -name \"*.sqlite\" -o -name \"*.sqlite2\" -o -name \"*.sqlite3\" \)")
+then
+  stop-timer
+  echo-subsidiary "Listed remote sqlite databases (${TIMER}s)"
+else
+  echo-error "Failed to list remote sqlite databases"
+  exit 1
+fi
+
+for REMOTE_DB in ${REMOTE_DBS}
+do
+  echo-step "Exporting database ${REMOTE_DB}"
+  start-timer
+  if (
+      set -e
+      LOCAL_DB="${BACKUPS_DIR}/mirror/${REMOTE_HOST}${REMOTE_DB}"
+      [[ -f "${LOCAL_DB}" ]] && rm "${LOCAL_DB}"
+      touch "${LOCAL_DB}"
+      CONTENT=$(ssh "${REMOTE_HOST}" "sqlite3 \"${REMOTE_DB}\" .dump")
+      echo "${CONTENT}" | sqlite3 "${LOCAL_DB}"      
+    )
+  then
+    stop-timer
+    echo-subsidiary "Exported database ${REMOTE_DB} (${TIMER}s)"
+  else
+    echo-error "Failed to export database"
+    exit 1
+  fi
+done
+
+echo-success "Completed sqlite backup"
