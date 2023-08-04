@@ -86,7 +86,7 @@ echo-subsidiary "Follow with: tail -n 100 -f ${OUTPUT_LOG_FILE}"
 echo-subsidiary "Source: ${SOURCE}"
 echo-subsidiary "Destination: ${DESTINATION}"
 
-echo-step "Syncing remote files"
+echo-step "Syncing files from remote"
 start-timer
 if ! rsync \
     --archive \
@@ -103,7 +103,7 @@ if ! rsync \
     "${DESTINATION}" \
     > "${OUTPUT_LOG_FILE}"
 then
-  echo-error "Failed to sync remote files"
+  echo-error "Failed to sync files from remote"
   exit 1
 fi
 
