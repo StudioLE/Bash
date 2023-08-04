@@ -89,7 +89,7 @@ echo-subsidiary "Mirror: ${LOCAL_MIRROR_DIR}"
 
 echo-step "Listing remote sqlite databases"
 start-timer
-if REMOTE_DBS=$(ssh "${REMOTE_HOST}" "find \"${REMOTE_DIR}\" -type f \( -name \"*.db\" -o -name \"*.sqlite\" -o -name \"*.sqlite2\" -o -name \"*.sqlite3\" \)")
+if REMOTE_DBS=$(ssh "${REMOTE_HOST}" "find \"${REMOTE_DIR}\" -type f \( -name \"*.db\" -o -name \"*.sqlite\" -o -name \"*.sqlite3\" \)")
 then
   stop-timer
   echo-subsidiary "Listed remote sqlite databases (${TIMER}s)"

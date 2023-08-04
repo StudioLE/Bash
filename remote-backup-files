@@ -65,7 +65,7 @@ then
   exit 1
 fi
 
-if [[ ! -v 2 ]] 
+if [[ ! -v 2 ]]
 then
   echo-error "Remote directory is required"
   exit 1
@@ -98,7 +98,6 @@ if ! rsync \
     --delete \
     --exclude "*.db" \
     --exclude "*.sqlite" \
-    --exclude "*.sqlite2" \
     --exclude "*.sqlite3" \
     --stats \
     "${REMOTE_SOURCE}" \
