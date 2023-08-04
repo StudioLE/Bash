@@ -7,6 +7,33 @@ Simple Bash scripts to improve the CLI experience. Primarily developed for Ubunt
 
 *tl;dr: You probably shouldn't use these scripts unless you wrote them yourself.*
 
+
+### [remote-backup-files](https://github.com/StudioLE/Bash/blob/main/remote-backup-files)
+
+Backup files from a remote server to a local `/backups` directory using `rsync`.
+Sqlite files with extensions `.db`, `.sqlite`, or `sqlite3` are excluded as they could become corrupted.
+Use `remote-backup-sqlite` for them.
+
+``` bash
+# Install
+curl -fsS https://install.studiole.uk/remote-backup-files | sudo bash
+
+# Run
+remote-backup-files [SSH_HOST] [REMOTE_DIRECTORY]
+```
+
+### [remote-backup-sqlite](https://github.com/StudioLE/Bash/blob/main/remote-backup-sqlite)
+
+Backup `sqlite3` files from a remote server to a local `/backups` directory.
+
+``` bash
+# Install
+curl -fsS https://install.studiole.uk/remote-backup-sqlite | sudo bash
+
+# Run
+remote-backup-files [SSH_HOST] [REMOTE_DIRECTORY]
+```
+
 ### [disable-motd](https://github.com/StudioLE/Bash/blob/main/disable-motd)
 
 Disable the most verbose parts of Ubuntu's default the Message of the Day (MOTD) displayed on login.
