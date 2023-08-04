@@ -7,6 +7,7 @@ Simple Bash scripts to improve the CLI experience. Primarily developed for Ubunt
 
 *tl;dr: You probably shouldn't use these scripts unless you wrote them yourself.*
 
+
 ### [disable-motd](https://github.com/StudioLE/Bash/blob/main/disable-motd)
 
 Disable the most verbose parts of Ubuntu's default the Message of the Day (MOTD) displayed on login.
@@ -62,6 +63,44 @@ curl -fsS https://install.studiole.uk/network-test | sudo bash
 
 # Run
 network-test
+```
+
+### [remote-backup-files](https://github.com/StudioLE/Bash/blob/main/remote-backup-files)
+
+Backup files from a remote server to a local `/backups` directory using `rsync`.
+Sqlite files with extensions `.db`, `.sqlite`, or `sqlite3` are excluded as they could become corrupted.
+Use `remote-backup-sqlite` for them.
+
+``` bash
+# Install
+curl -fsS https://install.studiole.uk/remote-backup-files | bash
+
+# Run
+remote-backup-files [SSH_HOST] [REMOTE_DIRECTORY]
+```
+
+### [remote-backup-sqlite](https://github.com/StudioLE/Bash/blob/main/remote-backup-sqlite)
+
+Backup `sqlite3` files from a remote server to a local `/backups` directory.
+
+``` bash
+# Install
+curl -fsS https://install.studiole.uk/remote-backup-sqlite | bash
+
+# Run
+remote-backup-sqlite [SSH_HOST] [REMOTE_DIRECTORY]
+```
+
+### [remote-restore](https://github.com/StudioLE/Bash/blob/main/remote-restore)
+
+Restore files backed up with `remote-backup-files` and `remote-backup-sqlite`.
+
+``` bash
+# Install
+curl -fsS https://install.studiole.uk/remote-restore | bash
+
+# Run
+remote-restore [SSH_HOST] [REMOTE_DIRECTORY]
 ```
 
 ### [upgrade-packages](https://github.com/StudioLE/Install/blob/main/src/upgrade-packages)
