@@ -31,7 +31,19 @@ Backup `sqlite3` files from a remote server to a local `/backups` directory.
 curl -fsS https://install.studiole.uk/remote-backup-sqlite | sudo bash
 
 # Run
-remote-backup-files [SSH_HOST] [REMOTE_DIRECTORY]
+remote-backup-sqlite [SSH_HOST] [REMOTE_DIRECTORY]
+```
+
+### [remote-restore](https://github.com/StudioLE/Bash/blob/main/remote-restore)
+
+Restore files backed up with `remote-backup-files` and `remote-backup-sqlite`.
+
+``` bash
+# Install
+curl -fsS https://install.studiole.uk/remote-restore | sudo bash
+
+# Run
+remote-restore [SSH_HOST] [REMOTE_DIRECTORY]
 ```
 
 ### [disable-motd](https://github.com/StudioLE/Bash/blob/main/disable-motd)

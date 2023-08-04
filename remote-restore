@@ -1,0 +1,100 @@
+#!/bin/bash
+set -uo pipefail
+
+REMOTE_HOST="${1}"
+REMOTE_DIR="${2}"
+SOURCE="/backups/${REMOTE_HOST}${REMOTE_DIR}/"
+DESTINATION="${REMOTE_HOST}:${REMOTE_DIR}"
+OUTPUT_LOG_DIR="/var/log/backups"
+OUTPUT_LOG_FILENAME="${REMOTE_HOST}-$(date +%Y-%m-%d_%H-%M-%S).out"
+OUTPUT_LOG_FILE="${OUTPUT_LOG_DIR}/${OUTPUT_LOG_FILENAME}"
+
+echo-success () {
+  echo -e "\e[32m ✔  $1\e[0m" >&2
+}
+
+echo-information () {
+  echo -e "\e[34m ⓘ  $1\e[0m" >&2
+}
+
+echo-error () {
+  echo -e "\e[31m !  $1\e[0m" >&2
+}
+
+echo-warning () {
+  echo -e "\e[33m ⚠  $1\e[0m" >&2
+}
+
+echo-subsidiary () {
+  echo -e "\e[37m    $1\e[0m" >&2
+}
+
+echo-step () {
+  echo -e "\e[0m »  $1\e[0m" >&2
+}
+
+start-timer () {
+  START_TIME=$(date +%s)
+}
+
+stop-timer () {
+  TIMER=$(($(date +%s) - START_TIME))
+  START_TIME=0
+}
+
+setup-output-log () {
+  if [[ ! -d "${OUTPUT_LOG_DIR}" ]]
+  then
+    mkdir -p "${OUTPUT_LOG_DIR}"
+  fi
+  if [[ ! -f "${OUTPUT_LOG_FILE}" ]]
+  then
+    touch "${OUTPUT_LOG_FILE}"
+  fi
+  if [[ ! -w "${OUTPUT_LOG_FILE}" ]]
+  then
+    echo-error "Output log file is not writable"
+    exit 1
+  fi
+}
+
+if [[ ! -v 1 ]] 
+then
+  echo-error "Remote host is required"
+  exit 1
+fi
+
+if [[ ! -v 2 ]]
+then
+  echo-error "Remote directory is required"
+  exit 1
+fi
+
+setup-output-log
+
+echo-information "Running restore"
+echo-subsidiary "Logging verbose output to: ${OUTPUT_LOG_FILE}"
+echo-subsidiary "Follow with: tail -n 100 -f ${OUTPUT_LOG_FILE}"
+echo-subsidiary "Source: ${SOURCE}"
+echo-subsidiary "Destination: ${DESTINATION}"
+
+echo-step "Syncing to remote"
+start-timer
+if ! rsync \
+    --archive \
+    --verbose \
+    --human-readable \
+    --partial \
+    --progress \
+    --delete \
+    --stats \
+    "${SOURCE}" \
+    "${DESTINATION}" \
+    > "${OUTPUT_LOG_FILE}"
+then
+  echo-error "Failed to sync to remote"
+  exit 1
+fi
+
+stop-timer
+echo-success "Completed restore (${TIMER}s)"
