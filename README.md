@@ -73,7 +73,7 @@ Use `remote-backup-sqlite` for them.
 
 ``` bash
 # Install
-curl -fsS https://install.studiole.uk/remote-backup-files | bash
+curl -fsS https://install.studiole.uk/remote-backup-files | sudo bash
 
 # Run
 remote-backup-files [SSH_HOST] [REMOTE_DIRECTORY]
@@ -85,7 +85,7 @@ Backup `sqlite3` files from a remote server to a local `/backups` directory.
 
 ``` bash
 # Install
-curl -fsS https://install.studiole.uk/remote-backup-sqlite | bash
+curl -fsS https://install.studiole.uk/remote-backup-sqlite | sudo bash
 
 # Run
 remote-backup-sqlite [SSH_HOST] [REMOTE_DIRECTORY]
@@ -97,7 +97,7 @@ Restore files backed up with `remote-backup-files` and `remote-backup-sqlite`.
 
 ``` bash
 # Install
-curl -fsS https://install.studiole.uk/remote-restore | bash
+curl -fsS https://install.studiole.uk/remote-restore | sudo bash
 
 # Run
 remote-restore [SSH_HOST] [REMOTE_DIRECTORY]
