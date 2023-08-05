@@ -97,6 +97,23 @@ else
   exit 1
 fi
 
+set -e
+echo "${REMOTE_DBS}" | while IFS= read -r REMOTE_DB
+do
+  echo-step "Checking database integrity ${REMOTE_DB}"
+  start-timer
+  if ssh -n "${REMOTE_HOST}" "sqlite3 \"${REMOTE_DB}\" \"PRAGMA integrity_check\"" > /dev/null
+  then
+    stop-timer
+    echo-subsidiary "Checked database integrity ${REMOTE_DB} (${TIMER}s)"
+  else
+    echo-error "Integrity check failed ${REMOTE_DB}"
+    exit 1
+  fi
+done
+set +e
+
+set -e
 echo "${REMOTE_DBS}" | while IFS= read -r REMOTE_DB
 do
   echo-step "Exporting database ${REMOTE_DB}"
@@ -117,5 +134,6 @@ do
     exit 1
   fi
 done
+set +e
 
 echo-success "Completed sqlite backup"
