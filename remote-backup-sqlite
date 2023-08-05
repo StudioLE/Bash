@@ -88,7 +88,7 @@ echo-subsidiary "Destination: ${DESTINATION}"
 
 echo-step "Listing remote sqlite databases"
 start-timer
-if REMOTE_DBS=$(ssh "${REMOTE_HOST}" "find \"${REMOTE_DIR}\" -type f \( -name \"*.db\" -o -name \"*.sqlite\" -o -name \"*.sqlite3\" \)")
+if REMOTE_DBS=$(ssh -n "${REMOTE_HOST}" "find \"${REMOTE_DIR}\" -type f \( -name \"*.db\" -o -name \"*.sqlite\" -o -name \"*.sqlite3\" \)")
 then
   stop-timer
   echo-subsidiary "Listed remote sqlite databases (${TIMER}s)"
@@ -97,7 +97,7 @@ else
   exit 1
 fi
 
-for REMOTE_DB in ${REMOTE_DBS}
+echo "${REMOTE_DBS}" | while IFS= read -r REMOTE_DB
 do
   echo-step "Exporting database ${REMOTE_DB}"
   start-timer
@@ -106,7 +106,7 @@ do
       LOCAL_DB="/backups/${REMOTE_HOST}${REMOTE_DB}"
       [[ -f "${LOCAL_DB}" ]] && rm "${LOCAL_DB}"
       touch "${LOCAL_DB}"
-      CONTENT=$(ssh "${REMOTE_HOST}" "sqlite3 \"${REMOTE_DB}\" .dump")
+      CONTENT=$(ssh -n "${REMOTE_HOST}" "sqlite3 \"${REMOTE_DB}\" .dump")
       echo "${CONTENT}" | sqlite3 "${LOCAL_DB}"      
     )
   then
