@@ -92,6 +92,7 @@ if ! rsync \
     --archive \
     --verbose \
     --human-readable \
+    --compress \
     --partial \
     --progress \
     --delete \
