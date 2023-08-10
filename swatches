@@ -1,0 +1,47 @@
+#!/bin/bash
+set -euo pipefail
+
+SHORTHAND=("BLK" "RED" "GRN" "YEL" "BLU" "MAG" "CYN" "GRY")
+
+set-text-color () {
+  echo -ne "\e[3${1}m"
+}
+
+set-background-color () {
+  echo -ne "\e[4${1}m"
+}
+
+reset-formatting () {
+  echo -ne "\e[0m"
+}
+
+spacer () {
+  echo -n "  "
+}
+
+linebreak () {
+  echo ""
+}
+
+for TEXT in {0..7}
+do
+  for BG in {0..7}
+  do
+    set-text-color "${TEXT}"
+    set-background-color "${BG}"
+    echo -n " ${SHORTHAND[${TEXT}]} "
+    reset-formatting
+    spacer
+  done
+  linebreak
+  for BG in {0..7}
+  do
+    set-text-color "${TEXT}"
+    set-background-color "${BG}"
+    echo -n " ${SHORTHAND[${BG}]} "
+    reset-formatting
+    spacer
+  done
+  linebreak
+  linebreak
+done
