@@ -97,6 +97,12 @@ else
   exit 1
 fi
 
+if [[ -z "${REMOTE_DBS}" ]]
+then
+  echo-warning "No sqlite databases found"
+  exit 0
+fi
+
 set -e
 echo "${REMOTE_DBS}" | while IFS= read -r REMOTE_DB
 do
