@@ -103,7 +103,24 @@ curl -fsS https://install.studiole.uk/remote-restore | sudo bash
 remote-restore [SSH_HOST] [REMOTE_DIRECTORY]
 ```
 
-### [upgrade-packages](https://github.com/StudioLE/Install/blob/main/src/upgrade-packages)
+### [swatches](https://github.com/StudioLE/Bash/blob/main/swatches)
+
+Print swatches of the basic terminal foreground and background pairs.
+
+``` bash
+# Run once
+curl -fsS https://bash.studiole.uk/swatches| sudo bash
+```
+
+``` bash
+# Install
+curl -fsS https://install.studiole.uk/swatches | sudo bash
+
+# Run
+swatches
+```
+
+### [upgrade-packages](https://github.com/StudioLE/Bash/blob/main/upgrade-packages)
 
 A basic script to quietly and non-interactively update and upgrade packages via `apt`.
 
