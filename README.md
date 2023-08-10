@@ -65,6 +65,18 @@ curl -fsS https://install.studiole.uk/network-test | sudo bash
 network-test
 ```
 
+### [remote-archive](https://github.com/StudioLE/Bash/blob/main/remote-archive)
+
+Create a timestamped archive of the `remote-backup-files` and `remote-backup-sqlite` backups.
+
+``` bash
+# Install
+curl -fsS https://install.studiole.uk/remote-archive | sudo bash
+
+# Run
+remote-archive [SSH_HOST]
+```
+
 ### [remote-backup-files](https://github.com/StudioLE/Bash/blob/main/remote-backup-files)
 
 Backup files from a remote server to a local `/backups` directory using `rsync`.

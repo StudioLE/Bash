@@ -1,0 +1,100 @@
+#!/bin/bash
+set -uo pipefail
+
+REMOTE_HOST="${1}"
+SOURCE="/backups/${REMOTE_HOST}"
+DESTINATION_DIR="/backups/archives"
+ARCHIVE_FILENAME="${REMOTE_HOST}-$(date +%Y-%m-%d_%H-%M-%S).tar.gz"
+DESTINATION="${DESTINATION_DIR}/${ARCHIVE_FILENAME}"
+OUTPUT_LOG_DIR="/var/log/backups"
+OUTPUT_LOG_FILENAME="archive-${REMOTE_HOST}-$(date +%Y-%m-%d_%H-%M-%S).out"
+OUTPUT_LOG_FILE="${OUTPUT_LOG_DIR}/${OUTPUT_LOG_FILENAME}"
+
+echo-success () {
+  echo -e "\e[32m ✔  $1\e[0m" >&2
+}
+
+echo-information () {
+  echo -e "\e[34m ⓘ  $1\e[0m" >&2
+}
+
+echo-error () {
+  echo -e "\e[31m !  $1\e[0m" >&2
+}
+
+echo-warning () {
+  echo -e "\e[33m ⚠  $1\e[0m" >&2
+}
+
+echo-subsidiary () {
+  echo -e "\e[37m    $1\e[0m" >&2
+}
+
+echo-step () {
+  echo -e "\e[0m »  $1\e[0m" >&2
+}
+
+start-timer () {
+  START_TIME=$(date +%s)
+}
+
+stop-timer () {
+  TIMER=$(($(date +%s) - START_TIME))
+  START_TIME=0
+}
+
+setup-output-log () {
+  if [[ ! -d "${OUTPUT_LOG_DIR}" ]]
+  then
+    mkdir -p "${OUTPUT_LOG_DIR}"
+  fi
+  if [[ ! -f "${OUTPUT_LOG_FILE}" ]]
+  then
+    touch "${OUTPUT_LOG_FILE}"
+  fi
+  if [[ ! -w "${OUTPUT_LOG_FILE}" ]]
+  then
+    echo-error "Output log file is not writable"
+    exit 1
+  fi
+}
+
+if [[ ! -v 1 ]] 
+then
+  echo-error "Remote host is required"
+  exit 1
+fi
+
+if [[ ! -d "${DESTINATION_DIR}" ]] 
+then
+  echo-error "Destination directory does not exist"
+  echo-information "For safety the destination directory must be manually created:"
+  echo-subsidiary "mkdir -p \"${DESTINATION_DIR}\""
+  exit 1
+fi
+
+setup-output-log
+
+echo-information "Running create archive"
+echo-subsidiary "Logging verbose output to: ${OUTPUT_LOG_FILE}"
+echo-subsidiary "Follow with: tail -n 100 -f ${OUTPUT_LOG_FILE}"
+echo-subsidiary "Source: ${SOURCE}"
+echo-subsidiary "Destination: ${DESTINATION}"
+
+echo-step "Creating archive"
+start-timer
+if ! tar \
+    --create \
+    --verbose \
+    --gzip \
+    --directory "${SOURCE}" \
+    --file "${DESTINATION}" \
+    . \
+    > "${OUTPUT_LOG_FILE}"
+then
+  echo-error "Failed to create archive"
+  exit 1
+fi
+
+stop-timer
+echo-success "Completed archive (${TIMER}s)"
