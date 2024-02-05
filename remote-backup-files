@@ -89,6 +89,7 @@ echo-subsidiary "Destination: ${DESTINATION}"
 echo-step "Syncing files from remote"
 start-timer
 if ! rsync \
+    --rsync-path="sudo rsync" \
     --archive \
     --verbose \
     --human-readable \
