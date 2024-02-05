@@ -88,7 +88,7 @@ echo-subsidiary "Destination: ${DESTINATION}"
 
 echo-step "Listing remote sqlite databases"
 start-timer
-if REMOTE_DBS=$(ssh -n "${REMOTE_HOST}" "find \"${REMOTE_DIR}\" -type f \( -name \"*.db\" -o -name \"*.sqlite\" -o -name \"*.sqlite3\" \)")
+if REMOTE_DBS=$(ssh -n "${REMOTE_HOST}" "sudo find \"${REMOTE_DIR}\" -type f \( -name \"*.db\" -o -name \"*.sqlite\" -o -name \"*.sqlite3\" \)")
 then
   stop-timer
   echo-subsidiary "Listed remote sqlite databases (${TIMER}s)"
