@@ -15,7 +15,7 @@ function move-cursor-up {
 }
 
 echo-table () {
-move-cursor-up 4
+  move-cursor-up 4
   HEADER1=", Ping, Ping, Curl, Curl, Network, IP, IP"
   HEADER2=", IP, DNS, IP, DNS, Interface, Internal, External"
   ROW1="IPv4, ${PING_IP_V4:-${P}}, ${PING_DNS_V4:-${P}}, ${CURL_IP_V4:-${P}}, ${CURL_DNS_V4:-${P}}, ${INTERFACE_V4:-${P}}, ${INTERNAL_V4:-${P}}, ${EXTERNAL_V4:-${P}}"
@@ -29,10 +29,30 @@ echo -ne "${GREY}"
 echo -e "\n\n\n\n"
 echo-table
 
-INTERFACE_V4=$(ip route get 1.1.1.1 2> /dev/null | awk -F "dev " 'NR==1{split($2,a," ");print a[1]}')
-INTERFACE_V6=$(ip route get 2606:4700:4700::1111 2> /dev/null | awk -F "dev " 'NR==1{split($2,a," ");print a[1]}')
-INTERNAL_V4=$(ip route get 1.1.1.1 2> /dev/null | awk -F "src " 'NR==1{split($2,a," ");print a[1]}')
-INTERNAL_V6=$(ip route get 2606:4700:4700::1111 2> /dev/null | awk -F "src " 'NR==1{split($2,a," ");print a[1]}')
+# INTERFACE_V4
+if ! INTERFACE_V4=$(ip route get 1.1.1.1 2> /dev/null | awk -F "dev " 'NR==1{split($2,a," ");print a[1]}')
+then
+  INTERFACE_V4="${N}"
+fi
+
+# INTERFACE_V6
+if ! INTERFACE_V6=$(ip route get 2606:4700:4700::1111 2> /dev/null | awk -F "dev " 'NR==1{split($2,a," ");print a[1]}')
+then
+  INTERFACE_V6="${N}"
+fi
+
+# INTERNAL_V4
+if ! INTERNAL_V4=$(ip route get 1.1.1.1 2> /dev/null | awk -F "src " 'NR==1{split($2,a," ");print a[1]}')
+then
+  INTERNAL_V4="${N}"
+fi
+
+# INTERNAL_V6
+if ! INTERNAL_V6=$(ip route get 2606:4700:4700::1111 2> /dev/null | awk -F "src " 'NR==1{split($2,a," ");print a[1]}')
+then
+  INTERNAL_V6="${N}"
+fi
+
 echo-table
 
 # PING_IP_V4
