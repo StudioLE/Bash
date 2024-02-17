@@ -28,7 +28,7 @@ echo-table () {
 }
 
 echo -ne "${GREY}"
-echo -e "\n\n\n\n"
+echo -ne "\n\n\n\n"
 echo-table
 
 if [[ -n "${INTERFACE}" ]] 
