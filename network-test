@@ -1,5 +1,7 @@
 #!/bin/bash
 set -uo pipefail
+
+INTERFACE="${1-}"
 GREEN="\e[32m"
 RED="\e[31m"
 GREY="\e[37m"
@@ -29,26 +31,37 @@ echo -ne "${GREY}"
 echo -e "\n\n\n\n"
 echo-table
 
-# INTERFACE_V4
-if ! INTERFACE_V4=$(ip route get 1.1.1.1 2> /dev/null | awk -F "dev " 'NR==1{split($2,a," ");print a[1]}')
+if [[ -n "${INTERFACE}" ]] 
 then
-  INTERFACE_V4="${N}"
-fi
+  PING_INTERFACE=(-I "${INTERFACE}")
+  CURL_INTERFACE=(--interface "${INTERFACE}")
+  INTERFACE_V4="${INTERFACE}"
+  INTERFACE_V6="${INTERFACE}"
+else
+  PING_INTERFACE=()
+  CURL_INTERFACE=()
 
-# INTERFACE_V6
-if ! INTERFACE_V6=$(ip route get 2606:4700:4700::1111 2> /dev/null | awk -F "dev " 'NR==1{split($2,a," ");print a[1]}')
-then
-  INTERFACE_V6="${N}"
+  # INTERFACE_V4
+  if ! INTERFACE_V4=$(ip route get 1.1.1.1 2> /dev/null | awk -F "dev " 'NR==1{split($2,a," ");print a[1]}')
+  then
+    INTERFACE_V4="${N}"
+  fi
+  
+  # INTERFACE_V6
+  if ! INTERFACE_V6=$(ip route get 2606:4700:4700::1111 2> /dev/null | awk -F "dev " 'NR==1{split($2,a," ");print a[1]}')
+  then
+    INTERFACE_V6="${N}"
+  fi
 fi
-
+  
 # INTERNAL_V4
-if ! INTERNAL_V4=$(ip route get 1.1.1.1 2> /dev/null | awk -F "src " 'NR==1{split($2,a," ");print a[1]}')
+if ! INTERNAL_V4=$(ip -brief -4 address show "${INTERFACE}" 2> /dev/null | awk '{print $3}' | awk -F/ '{print $1}')
 then
   INTERNAL_V4="${N}"
 fi
 
 # INTERNAL_V6
-if ! INTERNAL_V6=$(ip route get 2606:4700:4700::1111 2> /dev/null | awk -F "src " 'NR==1{split($2,a," ");print a[1]}')
+if ! INTERNAL_V6=$(ip -brief -6 address show "${INTERFACE}" 2> /dev/null | awk '{print $3}' | awk -F/ '{print $1}')
 then
   INTERNAL_V6="${N}"
 fi
@@ -56,31 +69,31 @@ fi
 echo-table
 
 # PING_IP_V4
-ping 1.1.1.1 -4 -c 1 -q -w 1 &> /dev/null && PING_IP_V4="${Y}" || PING_IP_V4="${N}"
+ping 1.1.1.1 "${PING_INTERFACE[@]}" -4 -c 1 -q -w 1 &> /dev/null && PING_IP_V4="${Y}" || PING_IP_V4="${N}"
 echo-table
 
 # PING_IP_V6
-ping 2606:4700:4700::1111 -6 -c 1 -q -w 1 &> /dev/null && PING_IP_V6="${Y}" || PING_IP_V6="${N}"
+ping 2606:4700:4700::1111 "${PING_INTERFACE[@]}" -6 -c 1 -q -w 1 &> /dev/null && PING_IP_V6="${Y}" || PING_IP_V6="${N}"
 echo-table
 
 # PING_DNS_V4
-ping one.one.one.one -4 -c 1 -q -w 1 &> /dev/null && PING_DNS_V4="${Y}" || PING_DNS_V4="${N}"
+ping one.one.one.one "${PING_INTERFACE[@]}" -4 -c 1 -q -w 1 &> /dev/null && PING_DNS_V4="${Y}" || PING_DNS_V4="${N}"
 echo-table
 
 # PING_DNS_V6
-ping one.one.one.one -6 -c 1 -q -w 1 &> /dev/null && PING_DNS_V6="${Y}" || PING_DNS_V6="${N}"
+ping one.one.one.one "${PING_INTERFACE[@]}" -6 -c 1 -q -w 1 &> /dev/null && PING_DNS_V6="${Y}" || PING_DNS_V6="${N}"
 echo-table
 
 # CURL_IP_V4
-curl 1.1.1.1 -4 --connect-timeout 1 --silent &> /dev/null && CURL_IP_V4="${Y}" || CURL_IP_V4="${N}"
+curl 1.1.1.1 "${CURL_INTERFACE[@]}" -4 --connect-timeout 1 --silent &> /dev/null && CURL_IP_V4="${Y}" || CURL_IP_V4="${N}"
 echo-table
 
 # CURL_IP_V6
-curl 'http://[2600:1901:0:7c33:0:0:0:0]:80/' -H 'Host: v6.ipinfo.io' -6 --connect-timeout 1 --silent &> /dev/null && CURL_IP_V6="${Y}" || CURL_IP_V6="${N}"
+curl 'http://[2600:1901:0:7c33:0:0:0:0]:80/' -H 'Host: v6.ipinfo.io' "${CURL_INTERFACE[@]}" -6 --connect-timeout 1 --silent &> /dev/null && CURL_IP_V6="${Y}" || CURL_IP_V6="${N}"
 echo-table
 
 # CURL_DNS_V4
-if EXTERNAL_V4=$(curl ipinfo.io/ip -4 --connect-timeout 1 --silent --fail 2> /dev/null)
+if EXTERNAL_V4=$(curl ipinfo.io/ip "${CURL_INTERFACE[@]}" -4 --connect-timeout 1 --silent --fail 2> /dev/null)
 then
   CURL_DNS_V4="${Y}"
 else
@@ -90,7 +103,7 @@ fi
 echo-table
 
 # CURL_DNS_V6
-if EXTERNAL_V6=$(curl v6.ipinfo.io/ip -6 --connect-timeout 1 --silent --fail 2> /dev/null)
+if EXTERNAL_V6=$(curl v6.ipinfo.io/ip "${CURL_INTERFACE[@]}" -6 --connect-timeout 1 --silent --fail 2> /dev/null)
 then
   CURL_DNS_V6="${Y}"
 else
